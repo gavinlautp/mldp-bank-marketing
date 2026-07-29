@@ -116,7 +116,7 @@ st.divider()
 if st.button("🔮 Predict subscription likelihood", type="primary", use_container_width=True):
 
     # ----------------------------------------------------------
-    # INPUT VALIDATION (A-band requirement: user-facing error messages)
+    # INPUT VALIDATION (Validate inputs before predicting so bad data doesn't reach the model.)
     # ----------------------------------------------------------
     errors = []
 
@@ -142,13 +142,12 @@ if st.button("🔮 Predict subscription likelihood", type="primary", use_contain
     # Only predict if there are no blocking errors (balance warning is non-blocking)
     blocking = [e for e in errors if "unreliable" not in e]
     if not blocking:
-
-        # ------------------------------------------------------
-        # Rebuild the SAME engineered features as the notebook
-        # ------------------------------------------------------
-        # pdays: -1 means "never contacted before". We derive it from `previous`:
-        # if there were previous contacts, we use a typical value; if not, -1.
-        pdays = -1 if previous == 0 else 100  # 100 = placeholder for "was contacted before"
+        # pdays: -1 means "never contacted before". When the customer WAS contacted
+        # before, we don't ask the user for the exact gap, so we substitute the median
+        # pdays of previously-contacted customers from the training data (194 days).
+        # This is a representative value the model actually saw, rather than an
+        # arbitrary placeholder.
+        pdays = -1 if previous == 0 else 194    
 
         # Engineered feature 1: previously_contacted
         previously_contacted = 0 if pdays == -1 else 1
