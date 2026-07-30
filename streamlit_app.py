@@ -192,9 +192,14 @@ if st.button("🔮 Predict subscription likelihood", type="primary", use_contain
         })
 
         # ------------------------------------------------------
-        # One-hot encode (same as notebook: drop_first=True)
+        # One-hot encode.
+        # NOTE: we do NOT use drop_first=True here. On a single-row input
+        # each category has only one value, so drop_first would delete every
+        # categorical column, leaving the model blind to the user's choices.
+        # The reindex() below aligns to the model's training columns, so the
+        # reference category is correctly represented as all-zeros.
         # ------------------------------------------------------
-        df_input = pd.get_dummies(df_input, drop_first=True)
+        df_input = pd.get_dummies(df_input)
 
         # ------------------------------------------------------
         # Align columns to the model's expected features
